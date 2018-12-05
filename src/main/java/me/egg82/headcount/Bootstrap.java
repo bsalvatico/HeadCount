@@ -14,9 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Bootstrap {
-    public static void main(String[] args) {
-        new Bootstrap();
-    }
+    public static void main(String[] args) { new Bootstrap(); }
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -43,6 +41,11 @@ public class Bootstrap {
             }
         }
 
+        logger.info("Loading dep Guava");
+        JarUtil.loadJar("http://central.maven.org/maven2/com/google/guava/guava/27.0.1-jre/guava-27.0.1-jre.jar",
+                new File(jarsFolder, "guava-27.0.1-jre.jar"),
+                classLoader);
+
         logger.info("Loading dep Caffeine");
         JarUtil.loadJar("http://central.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/2.6.2/caffeine-2.6.2.jar",
                 new File(jarsFolder, "caffeine-2.6.2.jar"),
@@ -56,6 +59,11 @@ public class Bootstrap {
         logger.info("Loading dep Javassist");
         JarUtil.loadJar("http://central.maven.org/maven2/org/javassist/javassist/3.23.1-GA/javassist-3.23.1-GA.jar",
                 new File(jarsFolder, "javassist-3.23.1-GA.jar"),
+                classLoader);
+
+        logger.info("Loading dep Pi4J");
+        JarUtil.loadJar("http://central.maven.org/maven2/com/pi4j/pi4j-core/1.1/pi4j-core-1.1.jar",
+                new File(jarsFolder, "pi4j-core-1.1.jar"),
                 classLoader);
 
         logger.info("Loading dep SQLite");
@@ -83,7 +91,7 @@ public class Bootstrap {
 
     private File getDirectory() {
         try {
-            return new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+            return new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
         } catch (URISyntaxException ex) {
             logger.error(ex.getMessage(), ex);
         }

@@ -2,6 +2,8 @@ package me.egg82.headcount.utils;
 
 import com.zaxxer.hikari.HikariConfig;
 import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -73,7 +75,7 @@ public class ConfigurationFileUtil {
         }
 
         if (!fileOnDisk.exists()) {
-            try (InputStreamReader reader = new InputStreamReader(ConfigurationFileUtil.class.getResourceAsStream(resourcePath));
+            try (InputStreamReader reader = new InputStreamReader(getResource(resourcePath));
                  BufferedReader in = new BufferedReader(reader);
                  FileWriter writer = new FileWriter(fileOnDisk);
                  BufferedWriter out = new BufferedWriter(writer)) {
@@ -126,5 +128,22 @@ public class ConfigurationFileUtil {
         hikariConfig.setAutoCommit(true);
 
         return new SQL(hikariConfig);
+    }
+
+    private static InputStream getResource(String filename) {
+        try {
+            URL url = ConfigurationFileUtil.class.getClassLoader().getResource(filename);
+
+            if (url == null) {
+                return null;
+            }
+
+            URLConnection connection = url.openConnection();
+            connection.setUseCaches(false);
+            return connection.getInputStream();
+        } catch (IOException ex) {
+            logger.error(ex.getMessage(), ex);
+            return null;
+        }
     }
 }

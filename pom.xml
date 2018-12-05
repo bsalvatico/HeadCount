@@ -59,10 +59,9 @@
                                         <exclude>org/intellij/**</exclude>
                                         <exclude>org/junit/**</exclude>
 
-                                        <!-- dep-injected -->
-                                        <exclude>com/github/benmanes/caffeine/**</exclude>
+                                        <!-- included -->
+                                        <exclude>com/google/common/**</exclude>
                                         <exclude>com/zaxxer/hikari/**</exclude>
-                                        <exclude>javassist/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -125,12 +124,14 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>25.1-jre</version>
+            <version>27.0.1-jre</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.6.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>me.lucko</groupId>
@@ -158,6 +159,7 @@
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-core</artifactId>
             <version>1.1</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
