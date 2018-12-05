@@ -1,0 +1,51 @@
+# How the software stores long-term data
+storage:
+  # The storage method
+  #
+  # Options:
+  # - MySQL (remote)
+  # - SQLite (local)
+  method: 'sqlite'
+
+  data:
+    # Address and port of the remote database (if applicable)
+    address: '127.0.0.1:3306'
+    # The name of the database the software will store data in
+    # If you're using remote options, this must be created beforehand
+    database: 'headcount'
+    # Table prefix for all software tables
+    prefix: 'headcount_'
+    # Database credentials (if applicable)
+    username: ''
+    password: ''
+
+    # MongoDB options- obviously don't need to worry about these if not using MongoDB ;)
+    mongodb:
+      # Connection prefix for all Anti-VPN connections
+      collection-prefix: ''
+      # MongoDB ClientConnectionURI
+      connection-uri: ''
+
+  settings:
+    # The maximum size of the database connection pool
+    # Determines the max number of connections to the database
+    max-pool-size: 2
+    # The minimum size of the database connection pool
+    # Determines the min number of connections kept alive to the database
+    min-idle: 2
+    # The maximum lifetime of a connection in the pool
+    # Should be at least 30 seconds less than any database or infrastructure-imposed connection time limit
+    max-lifetime: 1800000 # 30 minutes
+    # The maximum number of milliseconds that the plugin will wait for a new connection from the pool before timing out
+    timeout: 5000 # 5 seconds
+
+    # Extra connection properties
+    properties:
+      unicode: true
+      encoding: 'utf8'
+
+# When true, logs some extra output to the console so you can see if/why things might be failing
+debug: false
+
+# Config version, no touchy plz
+version: 1.0
