@@ -1,12 +1,18 @@
 package me.egg82.headcount;
 
 import java.io.File;
+
+import com.pi4j.io.gpio.*;
+import com.pi4j.io.gpio.event.GpioPinAnalogValueChangeEvent;
+import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
+import com.pi4j.io.gpio.event.GpioPinListenerAnalog;
 import me.egg82.headcount.enums.SQLType;
 import me.egg82.headcount.services.CachedConfigValues;
 import me.egg82.headcount.services.Configuration;
 import me.egg82.headcount.sql.MySQL;
 import me.egg82.headcount.sql.SQLite;
 import me.egg82.headcount.utils.ConfigurationFileUtil;
+import ninja.egg82.events.Pi4JEvents;
 import ninja.egg82.service.ServiceLocator;
 import ninja.egg82.service.ServiceNotFoundException;
 import org.slf4j.Logger;
@@ -53,5 +59,18 @@ public class HeadCount {
 
     private void start() {
         logger.info("Starting..");
+
+        GpioController controller = GpioFactory.getInstance();
+
+        GpioPinAnalogInput photosensorIn = controller.provisionAnalogInputPin(RaspiPin.GPIO_01);
+        Pi4JEvents.subscribe(photosensorIn, GpioPinAnalogValueChangeEvent.class).handler(e -> {
+            System.out.println("EventChain Output: " + e.getValue());
+        });
+        photosensorIn.addListener(new GpioPinListenerAnalog() {
+            @Override
+            public void handleGpioPinAnalogValueChangeEvent(GpioPinAnalogValueChangeEvent event) {
+                System.out.println("Regular Output: " + event.getValue());
+            }
+        });
     }
 }

@@ -6,7 +6,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 import me.egg82.headcount.enums.SQLType;
 import me.egg82.headcount.services.CachedConfigValues;
 import me.egg82.headcount.services.Configuration;

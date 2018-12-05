@@ -99,6 +99,11 @@
             <artifactId>collections</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>ninja.egg82</groupId>
+            <artifactId>event-chain-pi4j</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.spongepowered</groupId>
