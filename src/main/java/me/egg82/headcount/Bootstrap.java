@@ -62,8 +62,8 @@ public class Bootstrap {
                 classLoader);
 
         logger.info("Loading dep Pi4J");
-        JarUtil.loadJar("http://central.maven.org/maven2/com/pi4j/pi4j-core/1.1/pi4j-core-1.1.jar",
-                new File(jarsFolder, "pi4j-core-1.1.jar"),
+        JarUtil.loadJar("https://oss.sonatype.org/service/local/repositories/snapshots/content/com/pi4j/pi4j-core/1.2-SNAPSHOT/pi4j-core-1.2-20180423.162750-37.jar",
+                new File(jarsFolder, "pi4j-core-1.2-20180423.162750-37.jar"),
                 classLoader);
 
         logger.info("Loading dep SQLite");

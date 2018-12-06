@@ -1,5 +1,7 @@
 package me.egg82.headcount;
 
+import com.pi4j.io.gpio.event.GpioPinListenerDigital;
+import com.pi4j.io.gpio.exception.UnsupportedPinModeException;
 import java.io.File;
 
 import com.pi4j.io.gpio.*;
@@ -62,15 +64,25 @@ public class HeadCount {
 
         GpioController controller = GpioFactory.getInstance();
 
-        GpioPinAnalogInput photosensorIn = controller.provisionAnalogInputPin(RaspiPin.GPIO_01);
+        /*GpioPinAnalogInput photosensorIn = controller.provisionAnalogInputPin(RaspiPin.GPIO_01);
         Pi4JEvents.subscribe(photosensorIn, GpioPinAnalogValueChangeEvent.class).handler(e -> {
-            System.out.println("EventChain Output: " + e.getValue());
+            System.out.println("Output: " + e.getValue());
+        });*/
+
+        GpioPinDigitalInput photosensorIn = controller.provisionDigitalInputPin(RaspiPin.GPIO_01);
+        Pi4JEvents.subscribe(photosensorIn, GpioPinDigitalStateChangeEvent.class).handler(e -> {
+            System.out.println("Value 1: " + e.getState().getValue());
         });
-        photosensorIn.addListener(new GpioPinListenerAnalog() {
-            @Override
-            public void handleGpioPinAnalogValueChangeEvent(GpioPinAnalogValueChangeEvent event) {
-                System.out.println("Regular Output: " + event.getValue());
-            }
+
+        GpioPinDigitalInput photosensor2In = controller.provisionDigitalInputPin(RaspiPin.GPIO_26);
+        Pi4JEvents.subscribe(photosensor2In, GpioPinDigitalStateChangeEvent.class).handler(e -> {
+            System.out.println("Value 2: " + e.getState().getValue());
         });
+
+        do {
+            try {
+                Thread.sleep(500L);
+            } catch (InterruptedException ignored) {}
+        } while (true);
     }
 }
