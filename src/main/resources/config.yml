@@ -47,5 +47,31 @@ storage:
 # When true, logs some extra output to the console so you can see if/why things might be failing
 debug: false
 
+# GPIO information
+gpio:
+  # Sensor 1 on 5v
+  # This is because more voltage = more range = more accuracy
+  # We want the first sensor tripped to be accurate
+  # This way we can account for ambient noise
+  # When sensor 1 is tripped, it will act as the "trigger" for sensor 2
+  sensor1:
+    # The sensor voltage
+    voltage: 5
+    # The ADC pin for the sensor
+    pin: 'A0'
+    # The min value needed to count as a tripped sensor. Values between 0 and 1
+    value: 0.4
+  # The second sensor is on 3.3v
+  # This is because we don't need it to be as accurate as sensor 1
+  # Sensor 1 is the actual trigger. This sensor just ensures direction,
+  # so is only taken into account when sensor 1 is tripped
+  sensor2:
+    # The sensor voltage
+    voltage: 3.3
+    # The ADC pin for the sensor
+    pin: 'A1'
+    # The min value needed to count as a tripped sensor. Values between 0 and 1
+    value: 0.2
+
 # Config version, no touchy plz
 version: 1.0
