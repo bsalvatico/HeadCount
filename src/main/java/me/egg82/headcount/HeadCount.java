@@ -1,14 +1,13 @@
 package me.egg82.headcount;
 
+import com.pi4j.io.gpio.event.GpioPinAnalogValueChangeEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
 import com.pi4j.gpio.extension.ads.ADS1115Pin;
 import com.pi4j.gpio.extension.ads.ADS1x15GpioProvider;
 import com.pi4j.io.gpio.*;
-import com.pi4j.io.gpio.event.GpioPinAnalogValueChangeEvent;
 import com.pi4j.io.i2c.I2CFactory;
 import me.egg82.headcount.enums.SQLType;
 import me.egg82.headcount.services.CachedConfigValues;
@@ -16,6 +15,7 @@ import me.egg82.headcount.services.Configuration;
 import me.egg82.headcount.sql.MySQL;
 import me.egg82.headcount.sql.SQLite;
 import me.egg82.headcount.utils.ConfigurationFileUtil;
+import me.egg82.headcount.utils.EventUtil;
 import ninja.egg82.events.Pi4JEvents;
 import ninja.egg82.service.ServiceLocator;
 import ninja.egg82.service.ServiceNotFoundException;
@@ -32,6 +32,7 @@ public class HeadCount {
 
         loadServices();
         loadSQL();
+        loadGPIO();
 
         start();
     }
@@ -61,8 +62,8 @@ public class HeadCount {
         }
     }
 
-    private void start() {
-        logger.info("Starting..");
+    private void loadGPIO() {
+        logger.info("Loading GPIO..");
 
         GpioController controller = GpioFactory.getInstance();
 
@@ -101,81 +102,31 @@ public class HeadCount {
         provider.setEventThreshold(250.0d, ADS1115Pin.ALL);
         provider.setMonitorInterval(100);
 
-        Pi4JEvents.subscribe(inputs[0], GpioPinAnalogValueChangeEvent.class)
-                .filter(e -> {
-                    double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
+        ServiceLocator.register(controller);
+        ServiceLocator.register(provider);
+        ServiceLocator.register(inputs);
+    }
 
-                    CachedConfigValues cachedConfig;
+    private void start() {
+        logger.info("Starting..");
 
-                    try {
-                        cachedConfig = ServiceLocator.get(CachedConfigValues.class);
-                    } catch (InstantiationException | IllegalAccessException | ServiceNotFoundException ex) {
-                        logger.error(ex.getMessage(), ex);
-                        return false;
-                    }
+        CachedConfigValues cachedConfig;
+        GpioPinAnalogInput[] inputs;
 
-                    return value >= cachedConfig.getSensor1Value();
-                })
-                .handler(e -> {
-                    double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
+        try {
+            cachedConfig = ServiceLocator.get(CachedConfigValues.class);
+            inputs = ServiceLocator.get(GpioPinAnalogInput[].class);
+        } catch (InstantiationException | IllegalAccessException | ServiceNotFoundException ex) {
+            logger.error(ex.getMessage(), ex);
+            return;
+        }
 
-                    CachedConfigValues cachedConfig;
+        if (cachedConfig.getDebug()) {
+            Pi4JEvents.subscribe(inputs[cachedConfig.getSensor1Pin()], GpioPinAnalogValueChangeEvent.class).handler(e -> logger.debug("Sensor 1: " + (e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE)));
+            Pi4JEvents.subscribe(inputs[cachedConfig.getSensor2Pin()], GpioPinAnalogValueChangeEvent.class).handler(e -> logger.debug("Sensor 2: " + (e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE)));
+        }
 
-                    try {
-                        cachedConfig = ServiceLocator.get(CachedConfigValues.class);
-                    } catch (InstantiationException | IllegalAccessException | ServiceNotFoundException ex) {
-                        logger.error(ex.getMessage(), ex);
-                        return;
-                    }
-
-                    System.out.println("Tripped 1");
-                    Pi4JEvents.subscribe(inputs[1], GpioPinAnalogValueChangeEvent.class)
-                            .expireAfter(3L, TimeUnit.SECONDS)
-                            .filter(e2 -> {
-                                double value2 = e2.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
-                                return value2 >= cachedConfig.getSensor2Value();
-                            })
-                            .handler((s, e2) -> {
-                                double value2 = e2.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
-
-                                //System.out.println("Direction: " + value2 + "/" + cachedConfig.getSensor2Value());
-
-                                System.out.println("Tripped 2");
-                                s.cancel();
-                            });
-
-                    //System.out.println("Trigger: " + value + "/" + cachedConfig.getSensor1Value());
-                });
-
-        /*Pi4JEvents.subscribe(inputs[1], GpioPinAnalogValueChangeEvent.class)
-                .filter(e -> {
-                    double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
-
-                    CachedConfigValues cachedConfig;
-
-                    try {
-                        cachedConfig = ServiceLocator.get(CachedConfigValues.class);
-                    } catch (InstantiationException | IllegalAccessException | ServiceNotFoundException ex) {
-                        logger.error(ex.getMessage(), ex);
-                        return false;
-                    }
-
-                    return value >= cachedConfig.getSensor2Value();
-                })
-                .handler(e -> {
-                    double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
-
-                    CachedConfigValues cachedConfig;
-
-                    try {
-                        cachedConfig = ServiceLocator.get(CachedConfigValues.class);
-                    } catch (InstantiationException | IllegalAccessException | ServiceNotFoundException ex) {
-                        logger.error(ex.getMessage(), ex);
-                        return;
-                    }
-
-                    System.out.println("Direction: " + value + "/" + cachedConfig.getSensor2Value());
-                });*/
+        EventUtil.subscribeSensor1(cachedConfig, inputs[cachedConfig.getSensor1Pin()]);
 
         do {
             try {

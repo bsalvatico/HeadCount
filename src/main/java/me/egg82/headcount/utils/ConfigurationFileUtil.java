@@ -36,7 +36,7 @@ public class ConfigurationFileUtil {
         boolean debug = config.getNode("debug").getBoolean(false);
 
         if (debug) {
-            logger.info("Debug enabled");
+            logger.debug("Debug enabled");
         }
 
         try {
@@ -49,15 +49,24 @@ public class ConfigurationFileUtil {
                 .debug(debug)
                 .sql(getSQL(currentDirectory, config.getNode("storage")))
                 .sqlType(config.getNode("storage", "method").getString("sqlite"))
+                .setSensor1Pin(getPin(config.getNode("gpio", "sensor1", "pin").getString("a0")))
                 .setSensor1Value(clamp(0.0d, 1.0d, config.getNode("gpio", "sensor1", "value").getDouble(0.4d)))
+                .setSensor2Pin(getPin(config.getNode("gpio", "sensor2", "pin").getString("a1")))
                 .setSensor2Value(clamp(0.0d, 1.0d, config.getNode("gpio", "sensor2", "value").getDouble(0.4d)))
                 .build();
+
+        if (debug) {
+            logger.debug("Sensor 1 pin: " + config.getNode("gpio", "sensor1", "pin").getString());
+            logger.debug("Sensor 1 trigger: " + cachedValues.getSensor1Value());
+            logger.debug("Sensor 2 pin: " + config.getNode("gpio", "sensor2", "pin").getString());
+            logger.debug("Sensor 2 trigger: " + cachedValues.getSensor2Value());
+        }
 
         ServiceLocator.register(config);
         ServiceLocator.register(cachedValues);
 
         if (debug) {
-            logger.info("SQL type: " + cachedValues.getSQLType().name());
+            logger.debug("SQL type: " + cachedValues.getSQLType().name());
         }
     }
 
@@ -149,4 +158,22 @@ public class ConfigurationFileUtil {
     }
 
     private static double clamp(double min, double max, double val) { return Math.min(max, Math.max(min, val)); }
+
+    private static int getPin(String name) {
+        if (name == null) {
+            return -1;
+        }
+
+        if (name.equalsIgnoreCase("a0") || name.equals("0")) {
+            return 0;
+        } else if (name.equalsIgnoreCase("a1") || name.equals("1")) {
+            return 1;
+        } else if (name.equalsIgnoreCase("a2") || name.equals("2")) {
+            return 1;
+        } else if (name.equalsIgnoreCase("a3") || name.equals("3")) {
+            return 1;
+        }
+
+        return -1;
+    }
 }
