@@ -1,13 +1,14 @@
 package me.egg82.headcount;
 
-import com.pi4j.io.gpio.event.GpioPinListenerDigital;
-import com.pi4j.io.gpio.exception.UnsupportedPinModeException;
 import java.io.File;
+import java.io.IOException;
 
+import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
+import com.pi4j.gpio.extension.ads.ADS1115Pin;
+import com.pi4j.gpio.extension.ads.ADS1x15GpioProvider;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinAnalogValueChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
-import com.pi4j.io.gpio.event.GpioPinListenerAnalog;
+import com.pi4j.io.i2c.I2CFactory;
 import me.egg82.headcount.enums.SQLType;
 import me.egg82.headcount.services.CachedConfigValues;
 import me.egg82.headcount.services.Configuration;
@@ -64,25 +65,48 @@ public class HeadCount {
 
         GpioController controller = GpioFactory.getInstance();
 
-        /*GpioPinAnalogInput photosensorIn = controller.provisionAnalogInputPin(RaspiPin.GPIO_01);
-        Pi4JEvents.subscribe(photosensorIn, GpioPinAnalogValueChangeEvent.class).handler(e -> {
-            System.out.println("Output: " + e.getValue());
-        });*/
+        ADS1115GpioProvider provider = null;
 
-        GpioPinDigitalInput photosensorIn = controller.provisionDigitalInputPin(RaspiPin.GPIO_01);
-        Pi4JEvents.subscribe(photosensorIn, GpioPinDigitalStateChangeEvent.class).handler(e -> {
-            System.out.println("Value 1: " + e.getState().getValue());
-        });
+        try {
+            outer:
+            for (int address = 72; address <= 75; address++) {
+                for (int bus = 0; bus <= 17; bus++) {
+                    try {
+                        provider = new ADS1115GpioProvider(bus, address);
+                        logger.info("Found enabled bus " + bus + " at address " + address);
+                        break outer;
+                    } catch (I2CFactory.UnsupportedBusNumberException ignored) {}
+                }
+            }
+        } catch (IOException ex) {
+            logger.error(ex.getMessage(), ex);
+            return;
+        }
 
-        GpioPinDigitalInput photosensor2In = controller.provisionDigitalInputPin(RaspiPin.GPIO_26);
-        Pi4JEvents.subscribe(photosensor2In, GpioPinDigitalStateChangeEvent.class).handler(e -> {
-            System.out.println("Value 2: " + e.getState().getValue());
+        if (provider == null) {
+            logger.error("No enabled bus found. Is the pinout correct, and I2C enabled in raspi-config?");
+            return;
+        }
+
+        GpioPinAnalogInput[] inputs = new GpioPinAnalogInput[] {
+                controller.provisionAnalogInputPin(provider, ADS1115Pin.INPUT_A0)
+        };
+
+        provider.setProgrammableGainAmplifier(ADS1x15GpioProvider.ProgrammableGainAmplifierValue.PGA_4_096V, ADS1115Pin.ALL);
+        provider.setEventThreshold(500.0d, ADS1115Pin.ALL);
+        provider.setMonitorInterval(100);
+
+        Pi4JEvents.subscribe(inputs[0], GpioPinAnalogValueChangeEvent.class).handler(e -> {
+            double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
+            System.out.println("Output: " + value);
         });
 
         do {
             try {
                 Thread.sleep(500L);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+            }
         } while (true);
     }
 }
