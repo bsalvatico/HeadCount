@@ -49,6 +49,8 @@ public class ConfigurationFileUtil {
                 .debug(debug)
                 .sql(getSQL(currentDirectory, config.getNode("storage")))
                 .sqlType(config.getNode("storage", "method").getString("sqlite"))
+                .setSensor1Value(clamp(0.0d, 1.0d, config.getNode("gpio", "sensor1", "value").getDouble(0.4d)))
+                .setSensor2Value(clamp(0.0d, 1.0d, config.getNode("gpio", "sensor2", "value").getDouble(0.4d)))
                 .build();
 
         ServiceLocator.register(config);
@@ -145,4 +147,6 @@ public class ConfigurationFileUtil {
             return null;
         }
     }
+
+    private static double clamp(double min, double max, double val) { return Math.min(max, Math.max(min, val)); }
 }

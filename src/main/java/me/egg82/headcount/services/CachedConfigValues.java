@@ -15,6 +15,12 @@ public class CachedConfigValues {
     private SQLType sqlType = SQLType.SQLite;
     public SQLType getSQLType() { return sqlType; }
 
+    private double sensor1Value = 0.4d;
+    public double getSensor1Value() { return sensor1Value; }
+
+    private double sensor2Value = 0.4d;
+    public double getSensor2Value() { return sensor2Value; }
+
     public static CachedConfigValues.Builder builder() { return new CachedConfigValues.Builder(); }
 
     public static class Builder {
@@ -40,6 +46,30 @@ public class CachedConfigValues {
                 throw new IllegalArgumentException("value cannot be null.");
             }
             values.sqlType = SQLType.getByName(value);
+            return this;
+        }
+
+        public CachedConfigValues.Builder setSensor1Value(double value) {
+            if (value < 0.0d) {
+                throw new IllegalArgumentException("value cannot be < 0");
+            }
+            if (value > 1.0d) {
+                throw new IllegalArgumentException("value cannot be > 1");
+            }
+
+            values.sensor1Value = value;
+            return this;
+        }
+
+        public CachedConfigValues.Builder setSensor2Value(double value) {
+            if (value < 0.0d) {
+                throw new IllegalArgumentException("value cannot be < 0");
+            }
+            if (value > 1.0d) {
+                throw new IllegalArgumentException("value cannot be > 1");
+            }
+
+            values.sensor2Value = value;
             return this;
         }
 
