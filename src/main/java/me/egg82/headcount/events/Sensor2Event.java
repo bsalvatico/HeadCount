@@ -37,6 +37,8 @@ public class Sensor2Event implements BiConsumer<Pi4JAnalogEventSubscriber<GpioPi
             logger.debug("Sensor 2 tripped");
         }
 
+        logger.info("Adding one to count..");
+
         if (cachedConfig.getSQLType() == SQLType.MySQL) {
             MySQL.add(cachedConfig.getSQL(), config.getNode("storage"), 1);
         } else if (cachedConfig.getSQLType() == SQLType.SQLite) {
