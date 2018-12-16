@@ -1,7 +1,9 @@
 package me.egg82.headcount.services;
 
+import java.util.concurrent.TimeUnit;
 import me.egg82.headcount.enums.SQLType;
 import ninja.egg82.sql.SQL;
+import ninja.egg82.tuples.longs.LongObjectPair;
 
 public class CachedConfigValues {
     private CachedConfigValues() {}
@@ -26,6 +28,9 @@ public class CachedConfigValues {
 
     private double sensor2Value = 0.4d;
     public double getSensor2Value() { return sensor2Value; }
+
+    private LongObjectPair<TimeUnit> sensor2Time = new LongObjectPair<>(3L, TimeUnit.SECONDS);
+    public long getSensor2Time() { return sensor2Time.getSecond().toMillis(sensor2Time.getFirst()); }
 
     public static CachedConfigValues.Builder builder() { return new CachedConfigValues.Builder(); }
 
@@ -100,6 +105,18 @@ public class CachedConfigValues {
             }
 
             values.sensor2Value = value;
+            return this;
+        }
+
+        public CachedConfigValues.Builder setSensor2Time(long value, TimeUnit unit) {
+            if (value <= 0L) {
+                throw new IllegalArgumentException("value cannot be <= 0.");
+            }
+            if (unit == null) {
+                throw new IllegalArgumentException("unit cannot be null");
+            }
+
+            values.sensor2Time = new LongObjectPair<>(value, unit);
             return this;
         }
 

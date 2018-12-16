@@ -6,6 +6,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import me.egg82.headcount.enums.SQLType;
 import me.egg82.headcount.services.CachedConfigValues;
 import me.egg82.headcount.services.Configuration;
@@ -39,6 +40,20 @@ public class ConfigurationFileUtil {
             logger.debug("Debug enabled");
         }
 
+        String sensor2Time = config.getNode("gpio", "sensor2", "time").getString("3seconds");
+        Optional<Long> sensor2TimeLong = TimeUtil.getTime(sensor2Time);
+        Optional<TimeUnit> sensor2TimeUnit = TimeUtil.getUnit(sensor2Time);
+        if (!sensor2TimeLong.isPresent()) {
+            logger.warn("gpio.sensor2.time is not a valid time pattern. Using default value.");
+            sensor2TimeLong = Optional.of(3L);
+            sensor2TimeUnit = Optional.of(TimeUnit.SECONDS);
+        }
+        if (!sensor2TimeUnit.isPresent()) {
+            logger.warn("gpio.sensor2.time is not a valid time pattern. Using default value.");
+            sensor2TimeLong = Optional.of(3L);
+            sensor2TimeUnit = Optional.of(TimeUnit.SECONDS);
+        }
+
         try {
             destroyServices(ServiceLocator.getOptional(CachedConfigValues.class));
         } catch (InstantiationException | IllegalAccessException ex) {
@@ -53,6 +68,7 @@ public class ConfigurationFileUtil {
                 .setSensor1Value(clamp(0.0d, 1.0d, config.getNode("gpio", "sensor1", "value").getDouble(0.4d)))
                 .setSensor2Pin(getPin(config.getNode("gpio", "sensor2", "pin").getString("a1")))
                 .setSensor2Value(clamp(0.0d, 1.0d, config.getNode("gpio", "sensor2", "value").getDouble(0.4d)))
+                .setSensor2Time(sensor2TimeLong.get(), sensor2TimeUnit.get())
                 .build();
 
         if (debug) {

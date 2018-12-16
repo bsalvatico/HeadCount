@@ -58,6 +58,8 @@ gpio:
   # Sensor 1 is the actual trigger. Sensor 2 just ensures direction,
   # so is only taken into account when sensor 1 is tripped
   sensor2:
+    # The amount of time the sensor should be active for when sensor 1 trips
+    time: '3seconds'
     # The ADC pin for the sensor
     pin: 'A1'
     # The min value needed to count as a tripped sensor. Values between 0 and 1

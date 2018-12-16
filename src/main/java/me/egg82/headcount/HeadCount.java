@@ -8,13 +8,16 @@ import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
 import com.pi4j.gpio.extension.ads.ADS1115Pin;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.i2c.I2CFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import me.egg82.headcount.enums.SQLType;
+import me.egg82.headcount.events.Sensor1Event;
+import me.egg82.headcount.events.Sensor2Event;
 import me.egg82.headcount.services.CachedConfigValues;
 import me.egg82.headcount.services.Configuration;
 import me.egg82.headcount.sql.MySQL;
 import me.egg82.headcount.sql.SQLite;
 import me.egg82.headcount.utils.ConfigurationFileUtil;
-import me.egg82.headcount.utils.EventUtil;
 import ninja.egg82.events.Pi4JEvents;
 import ninja.egg82.service.ServiceLocator;
 import ninja.egg82.service.ServiceNotFoundException;
@@ -125,7 +128,31 @@ public class HeadCount {
             Pi4JEvents.subscribe(inputs[cachedConfig.getSensor2Pin()], GpioPinAnalogValueChangeEvent.class).handler(e -> logger.debug("Sensor 2: " + (e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE)));
         }
 
-        EventUtil.subscribeSensor1(cachedConfig, inputs[cachedConfig.getSensor1Pin()]);
+        AtomicBoolean sensorState = new AtomicBoolean(false);
+        AtomicLong currentTime = new AtomicLong(System.currentTimeMillis());
+
+        Pi4JEvents.subscribe(inputs[cachedConfig.getSensor1Pin()], GpioPinAnalogValueChangeEvent.class)
+                .filter(e -> !sensorState.get())
+                .filter(e -> {
+                    double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
+                    return value >= cachedConfig.getSensor1Value();
+                })
+                .handler((h, e) -> new Sensor1Event(sensorState, currentTime).accept(h, e));
+
+        Pi4JEvents.subscribe(inputs[cachedConfig.getSensor2Pin()], GpioPinAnalogValueChangeEvent.class)
+                .filter(e -> sensorState.get())
+                .filter(e -> {
+                    boolean retVal = System.currentTimeMillis() < Math.addExact(currentTime.get(), cachedConfig.getSensor2Time());
+                    if (!retVal) {
+                        sensorState.set(false);
+                    }
+                    return retVal;
+                })
+                .filter(e -> {
+                    double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
+                    return value >= cachedConfig.getSensor2Value();
+                })
+                .handler((h, e) -> new Sensor2Event(sensorState).accept(h, e));
 
         do {
             try {
