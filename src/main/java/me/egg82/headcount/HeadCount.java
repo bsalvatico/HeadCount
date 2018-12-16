@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import com.pi4j.gpio.extension.ads.ADS1115GpioProvider;
 import com.pi4j.gpio.extension.ads.ADS1115Pin;
-import com.pi4j.gpio.extension.ads.ADS1x15GpioProvider;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.i2c.I2CFactory;
 import me.egg82.headcount.enums.SQLType;
@@ -97,7 +96,7 @@ public class HeadCount {
                 controller.provisionAnalogInputPin(provider, ADS1115Pin.INPUT_A3)
         };
 
-        provider.setProgrammableGainAmplifier(ADS1x15GpioProvider.ProgrammableGainAmplifierValue.PGA_2_048V, ADS1115Pin.ALL);
+        provider.setProgrammableGainAmplifier(ADS1115GpioProvider.ProgrammableGainAmplifierValue.PGA_2_048V, ADS1115Pin.ALL);
 
         provider.setEventThreshold(250.0d, ADS1115Pin.ALL);
         provider.setMonitorInterval(100);

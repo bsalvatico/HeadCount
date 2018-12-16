@@ -25,10 +25,9 @@ public class SQLite {
                 }
 
                 sql.execute("CREATE TABLE `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` ("
-                        + "`ip` TEXT(45) NOT NULL,"
-                        + "`value` INTEGER(1) NOT NULL,"
+                        + "`count` INTEGER NOT NULL,"
                         + "`created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-                        + "UNIQUE(`ip`)"
+                        + "UNIQUE(`created`)"
                         + ");");
             } catch (SQLException ex) {
                 logger.error(ex.getMessage(), ex);
@@ -36,20 +35,13 @@ public class SQLite {
         });
     }
 
-    public static CompletableFuture<Boolean> update(SQL sql, ConfigurationNode storageConfigNode, String ip, boolean value) {
-        String tablePrefix = !storageConfigNode.getNode("data", "prefix").getString("").isEmpty() ? storageConfigNode.getNode("data", "prefix").getString() : "antivpn_";
+    public static CompletableFuture<Boolean> add(SQL sql, ConfigurationNode storageConfigNode, int count) {
+        String tablePrefix = !storageConfigNode.getNode("data", "prefix").getString("").isEmpty() ? storageConfigNode.getNode("data", "prefix").getString() : "headcount_";
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                sql.execute("INSERT OR REPLACE INTO `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` (`ip`, `value`) VALUES (?, ?);", ip, (value) ? 1 : 0);
-                SQLQueryResult query = sql.query("SELECT `created` FROM `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` WHERE `ip`=?;", ip);
-
-                Timestamp sqlCreated;
-
-                for (Object[] o : query.getData()) {
-                    sqlCreated = getTime(o[0]);
-                    return Boolean.TRUE;
-                }
+                sql.execute("INSERT OR REPLACE INTO `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` (`count`) VALUES (?);", count);
+                return Boolean.TRUE;
             } catch (SQLException | ClassCastException ex) {
                 logger.error(ex.getMessage(), ex);
             }

@@ -26,32 +26,23 @@ public class MySQL {
                 }
 
                 sql.execute("CREATE TABLE `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` ("
-                        + "`ip` VARCHAR(45) NOT NULL,"
-                        + "`value` BOOLEAN NOT NULL,"
+                        + "`count` BIGINT NOT NULL,"
                         + "`created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
                         + ");");
-                sql.execute("ALTER TABLE `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` ADD UNIQUE (`ip`);");
+                sql.execute("ALTER TABLE `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` ADD UNIQUE (`created`);");
             } catch (SQLException ex) {
                 logger.error(ex.getMessage(), ex);
             }
         });
     }
 
-    public static CompletableFuture<Boolean> update(SQL sql, ConfigurationNode storageConfigNode, String ip, boolean value) {
+    public static CompletableFuture<Boolean> add(SQL sql, ConfigurationNode storageConfigNode, int count) {
         String tablePrefix = !storageConfigNode.getNode("data", "prefix").getString("").isEmpty() ? storageConfigNode.getNode("data", "prefix").getString() : "headcount_";
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                sql.execute("INSERT INTO `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` (`ip`, `value`) VALUES(?, ?) ON DUPLICATE KEY UPDATE `value`=?, `created`=CURRENT_TIMESTAMP();", ip, (value) ? 1 : 0, (value) ? 1 : 0);
-                SQLQueryResult query = sql.query("SELECT `created` FROM `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` WHERE `ip`=?;", ip);
-
-                Timestamp sqlCreated = null;
-                Timestamp updated = new Timestamp(System.currentTimeMillis());
-
-                for (Object[] o : query.getData()) {
-                    sqlCreated = (Timestamp) o[0];
-                    return Boolean.TRUE;
-                }
+                sql.execute("INSERT INTO `" + tablePrefix.substring(0, tablePrefix.length() - 1) + "` (`count`) VALUES(?) ON DUPLICATE KEY UPDATE `count`=`count`+?;", count, count);
+                return Boolean.TRUE;
             } catch (SQLException | ClassCastException ex) {
                 logger.error(ex.getMessage(), ex);
             }

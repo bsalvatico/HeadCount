@@ -2,6 +2,7 @@ package me.egg82.headcount.events;
 
 import com.pi4j.io.gpio.GpioPinAnalogInput;
 import com.pi4j.io.gpio.event.GpioPinAnalogValueChangeEvent;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.BiConsumer;
 import me.egg82.headcount.services.CachedConfigValues;
 import me.egg82.headcount.utils.EventUtil;
@@ -26,9 +27,17 @@ public class Sensor1Event implements BiConsumer<Pi4JAnalogEventSubscriber<GpioPi
             return;
         }
 
-        handler.cancel();
+        if (cachedConfig.getDebug()) {
+            logger.debug("Sensor 1 tripped");
+        }
 
-        System.out.println("Tripped 1");
-        EventUtil.subscribeSensor2(cachedConfig, inputs[cachedConfig.getSensor2Pin()]);
+        // The way the listeners are iterated prevents us from cancelling while in our current thread
+        // ConcModExceptions, ahoy!
+        // So, instead, we're going to submit the cancellation in a new task and hope for the best
+        // Because the Pi4J library is funny that way.
+        ForkJoinPool.commonPool().execute(() -> {
+            handler.cancel();
+            EventUtil.subscribeSensor2(cachedConfig, inputs[cachedConfig.getSensor2Pin()]);
+        });
     }
 }
