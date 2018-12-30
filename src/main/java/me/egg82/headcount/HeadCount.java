@@ -127,7 +127,7 @@ public class HeadCount {
             Pi4JEvents.subscribe(inputs[cachedConfig.getSensor2Pin()], GpioPinAnalogValueChangeEvent.class).handler(e -> logger.debug("Sensor 2: " + (e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE)));
         }
 
-        AtomicLong sensor1TripTime = new AtomicLong(System.currentTimeMillis());
+        AtomicLong sensor1TripTime = new AtomicLong(-1L);
 
         Pi4JEvents.subscribe(inputs[cachedConfig.getSensor1Pin()], GpioPinAnalogValueChangeEvent.class)
                 .filter(e -> {
