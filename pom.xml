@@ -107,7 +107,7 @@
         <dependency>
             <groupId>ninja.egg82</groupId>
             <artifactId>event-chain-pi4j</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6</version>
         </dependency>
 
         <dependency>
