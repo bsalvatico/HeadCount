@@ -107,13 +107,13 @@
         <dependency>
             <groupId>ninja.egg82</groupId>
             <artifactId>event-chain-pi4j</artifactId>
-            <version>1.0.6</version>
+            <version>1.0.7</version>
         </dependency>
 
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>configurate-yaml</artifactId>
-            <version>3.5</version>
+            <version>3.6</version>
         </dependency>
         <dependency>
             <groupId>org.spongepowered</groupId>
@@ -186,7 +186,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.3.1</version>
+            <version>5.3.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

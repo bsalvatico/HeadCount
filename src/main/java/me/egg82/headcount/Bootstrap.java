@@ -52,13 +52,13 @@ public class Bootstrap {
                 classLoader);
 
         logger.info("Loading dep HikariCP");
-        JarUtil.loadJar("http://central.maven.org/maven2/com/zaxxer/HikariCP/3.2.0/HikariCP-3.2.0.jar",
-                new File(jarsFolder, "HikariCP-3.2.0.jar"),
+        JarUtil.loadJar("http://central.maven.org/maven2/com/zaxxer/HikariCP/3.3.0/HikariCP-3.3.0.jar",
+                new File(jarsFolder, "HikariCP-3.3.0.jar"),
                 classLoader);
 
         logger.info("Loading dep Javassist");
-        JarUtil.loadJar("http://central.maven.org/maven2/org/javassist/javassist/3.23.1-GA/javassist-3.23.1-GA.jar",
-                new File(jarsFolder, "javassist-3.23.1-GA.jar"),
+        JarUtil.loadJar("http://central.maven.org/maven2/org/javassist/javassist/3.24.1-GA/javassist-3.24.1-GA.jar",
+                new File(jarsFolder, "javassist-3.24.1-GA.jar"),
                 classLoader);
 
         logger.info("Loading dep SQLite");
@@ -73,8 +73,8 @@ public class Bootstrap {
         }
 
         logger.info("Loading dep MySQL");
-        JarUtil.loadJar("http://central.maven.org/maven2/mysql/mysql-connector-java/8.0.13/mysql-connector-java-8.0.13.jar",
-                new File(jarsFolder, "mysql-connector-java-8.0.13.jar"),
+        JarUtil.loadJar("http://central.maven.org/maven2/mysql/mysql-connector-java/8.0.14/mysql-connector-java-8.0.14.jar",
+                new File(jarsFolder, "mysql-connector-java-8.0.14.jar"),
                 classLoader);
 
         try {
