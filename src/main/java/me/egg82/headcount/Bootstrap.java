@@ -42,28 +42,28 @@ public class Bootstrap {
         }
 
         logger.info("Loading dep Guava");
-        JarUtil.loadJar("http://central.maven.org/maven2/com/google/guava/guava/27.0.1-jre/guava-27.0.1-jre.jar",
-                new File(jarsFolder, "guava-27.0.1-jre.jar"),
+        JarUtil.loadJar("https://search.maven.org/remotecontent?filepath=com/google/guava/guava/27.1-jre/guava-27.1-jre.jar",
+                new File(jarsFolder, "guava-27.1-jre.jar"),
                 classLoader);
 
         logger.info("Loading dep Caffeine");
-        JarUtil.loadJar("http://central.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/2.6.2/caffeine-2.6.2.jar",
-                new File(jarsFolder, "caffeine-2.6.2.jar"),
+        JarUtil.loadJar("https://search.maven.org/remotecontent?filepath=com/github/ben-manes/caffeine/caffeine/2.7.0/caffeine-2.7.0.jar",
+                new File(jarsFolder, "caffeine-2.7.0.jar"),
                 classLoader);
 
         logger.info("Loading dep HikariCP");
-        JarUtil.loadJar("http://central.maven.org/maven2/com/zaxxer/HikariCP/3.3.0/HikariCP-3.3.0.jar",
-                new File(jarsFolder, "HikariCP-3.3.0.jar"),
+        JarUtil.loadJar("https://search.maven.org/remotecontent?filepath=com/zaxxer/HikariCP/3.3.1/HikariCP-3.3.1.jar",
+                new File(jarsFolder, "HikariCP-3.3.1.jar"),
                 classLoader);
 
         logger.info("Loading dep Javassist");
-        JarUtil.loadJar("http://central.maven.org/maven2/org/javassist/javassist/3.24.1-GA/javassist-3.24.1-GA.jar",
+        JarUtil.loadJar("https://search.maven.org/remotecontent?filepath=org/javassist/javassist/3.24.1-GA/javassist-3.24.1-GA.jar",
                 new File(jarsFolder, "javassist-3.24.1-GA.jar"),
                 classLoader);
 
         logger.info("Loading dep SQLite");
-        JarUtil.loadJar("http://central.maven.org/maven2/org/xerial/sqlite-jdbc/3.25.2/sqlite-jdbc-3.25.2.jar",
-                new File(jarsFolder, "sqlite-jdbc-3.25.2.jar"),
+        JarUtil.loadJar("https://search.maven.org/remotecontent?filepath=org/xerial/sqlite-jdbc/3.27.2/sqlite-jdbc-3.27.2.jar",
+                new File(jarsFolder, "sqlite-jdbc-3.27.2.jar"),
                 classLoader);
 
         try {
@@ -73,8 +73,8 @@ public class Bootstrap {
         }
 
         logger.info("Loading dep MySQL");
-        JarUtil.loadJar("http://central.maven.org/maven2/mysql/mysql-connector-java/8.0.14/mysql-connector-java-8.0.14.jar",
-                new File(jarsFolder, "mysql-connector-java-8.0.14.jar"),
+        JarUtil.loadJar("https://search.maven.org/remotecontent?filepath=mysql/mysql-connector-java/8.0.15/mysql-connector-java-8.0.15.jar",
+                new File(jarsFolder, "mysql-connector-java-8.0.15.jar"),
                 classLoader);
 
         try {
