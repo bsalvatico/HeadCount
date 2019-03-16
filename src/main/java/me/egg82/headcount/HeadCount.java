@@ -96,7 +96,7 @@ public class HeadCount {
                 controller.provisionAnalogInputPin(provider, ADS1115Pin.INPUT_A3)
         };
 
-        provider.setProgrammableGainAmplifier(ADS1115GpioProvider.ProgrammableGainAmplifierValue.PGA_2_048V, ADS1115Pin.ALL);
+        provider.setProgrammableGainAmplifier(ADS1115GpioProvider.ProgrammableGainAmplifierValue.PGA_4_096V, ADS1115Pin.ALL);
 
         provider.setEventThreshold(250.0d, ADS1115Pin.ALL);
         provider.setMonitorInterval(100);
@@ -142,17 +142,24 @@ public class HeadCount {
                     sensor1TripTime.set(System.currentTimeMillis());
                 });
 
+        if (cachedConfig.getDebug()) {
+            Pi4JEvents.subscribe(inputs[cachedConfig.getSensor2Pin()], GpioPinAnalogValueChangeEvent.class)
+                    .filter(e -> {
+                        double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
+                        return value >= cachedConfig.getSensor2Value();
+                    })
+                    .handler(e -> {
+                        logger.debug("Sensor 2 tripped");
+                    });
+        }
+
         Pi4JEvents.subscribe(inputs[cachedConfig.getSensor2Pin()], GpioPinAnalogValueChangeEvent.class)
-                .filter(e -> System.currentTimeMillis() < Math.addExact(sensor1TripTime.get(), cachedConfig.getSensor2Time()))
+                .filter(e -> System.currentTimeMillis() <= Math.addExact(sensor1TripTime.get(), cachedConfig.getSensor2Time()))
                 .filter(e -> {
                     double value = e.getValue() / ADS1115GpioProvider.ADS1115_RANGE_MAX_VALUE;
                     return value >= cachedConfig.getSensor2Value();
                 })
                 .handler(e -> {
-                    if (cachedConfig.getDebug()) {
-                        logger.debug("Sensor 2 tripped");
-                    }
-
                     logger.info("Adding one to count..");
 
                     if (cachedConfig.getSQLType() == SQLType.MySQL) {
